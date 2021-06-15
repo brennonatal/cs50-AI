@@ -66,11 +66,13 @@ def transition_model(corpus, page, damping_factor):
     # distributing damping_factor among possible links
     for link in distribution:
         if link in possible_links_on_page:
-            distribution[link] = ((1 - damping_factor) / len(distribution)) + (damping_factor / len(possible_links_on_page))
+            distribution[link] = ((1 - damping_factor) / len(distribution)) + \
+                (damping_factor / len(possible_links_on_page))
             continue
         distribution[link] = (1 - damping_factor) / len(distribution)
 
     return distribution
+
 
 def sample_pagerank(corpus, damping_factor, n):
     """
@@ -92,11 +94,14 @@ def sample_pagerank(corpus, damping_factor, n):
         sample = transition_model(corpus, choice, damping_factor)
 
         for link in sample:
-            distribution[link] = ((i - 1) * distribution[link] + sample[link]) / i
+            distribution[link] = (
+                (i - 1) * distribution[link] + sample[link]) / i
 
-        choice = random.choices(list(distribution.keys()), list(distribution.values()), k=1)[0]
+        choice = random.choices(list(distribution.keys()), list(
+            distribution.values()), k=1)[0]
 
     return distribution
+
 
 def sigma(corpus, distribution, link):
     total = 0
@@ -104,6 +109,7 @@ def sigma(corpus, distribution, link):
         if link in corpus[key]:
             total += distribution[key] / len(corpus[key])
     return total
+
 
 def iterate_pagerank(corpus, damping_factor):
     """
@@ -114,18 +120,27 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    rank_variation = float('inf')
+    rank_variation = 0
     n = len(corpus)
     distribution = dict()
-    # assigning each page a rank of 1 / N
+    # dict to track variation between distributions
+    variation = dict()
     for key in corpus:
+        # assigning each page a rank of 1 / N
         distribution[key] = 1 / n
+        variation[key] = float('inf')
     # the process should repeat until no PageRank value changes by more than 0.001
-    while rank_variation >= 0.001:
+    while rank_variation < n:
+        rank_variation = 0
         for link in distribution:
             old_distribution = distribution[link]
-            distribution[link] = ((1 - damping_factor) / n) + (damping_factor * sigma(corpus, distribution, link))
-            rank_variation = abs(distribution[link] - old_distribution)
+            distribution[link] = ((1 - damping_factor) / n) + \
+                (damping_factor * sigma(corpus, distribution, link))
+            variation[link] = abs(old_distribution - distribution[link])
+        # checking changes
+        for key in variation:
+            if variation[key] <= 0.001:
+                rank_variation += 1
 
     return distribution
 
