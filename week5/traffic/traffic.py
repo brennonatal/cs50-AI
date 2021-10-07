@@ -68,7 +68,7 @@ def load_data(data_dir):
     # loop over all categories
     for category in range(NUM_CATEGORIES):
         # change working directory to category folder
-        os.chdir(str(root) + os.sep + str(data_dir) + os.sep + str(category))
+        os.chdir(os.path.join(root, data_dir, str(category)))
         # loop over image files in category folder
         for image in os.listdir():
             # read image
@@ -81,6 +81,9 @@ def load_data(data_dir):
             images.append(img_data)
             # label data
             labels.append(category)
+    
+    # return to original dir
+    os.chdir(root)
 
     return (images, labels)
 
